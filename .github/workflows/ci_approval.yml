@@ -26,11 +26,6 @@ jobs:
         with:
           user_login: ${{ github.event.pull_request.user.login }}
           maintainers: ${{ secrets.CI_APPROVED_USERS }}
-
-      - name: Add CI Approved Label
-        if: steps.approval_check.outputs.ci_approved_label != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          gh pr edit ${{ github.event.pull_request.html_url }} --add-label ${{ steps.approval_check.outputs.ci_approved_label }}
+
