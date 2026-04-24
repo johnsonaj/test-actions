@@ -1,9 +1,9 @@
 name: CI Approval Check
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
+#permissions:
+#  contents: read
+#  issues: write
+#  pull-requests: write
 
 on:
   pull_request_target:
@@ -11,20 +11,31 @@ on:
       - opened
 
 jobs:
-  ci_approval_check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Approval Check
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          sparse-checkout: .github/actions/check
+#  ci_approval_check:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout Approval Check
+#        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+#        with:
+#          sparse-checkout: .github/actions/check
+#
+#      - name: Run Approval Check
+#        id: approval_check
+#        uses: ./.github/actions/check
+#        with:
+#          user_login: ${{ github.event.pull_request.user.login }}
+#          maintainers: ${{ secrets.CI_APPROVED_USERS }}
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run Approval Check
-        id: approval_check
-        uses: ./.github/actions/check
+    ci_approval_check:
+        uses: ./.github/workflows/reusable_ci_approval.yml
+        permissions:
+          contents: read
+          issues: write
+          pull-requests: write
         with:
           user_login: ${{ github.event.pull_request.user.login }}
+        secrets:
           maintainers: ${{ secrets.CI_APPROVED_USERS }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          token: ${{ secrets.GITHUB_TOKEN }}
