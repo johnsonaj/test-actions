@@ -33,4 +33,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          gh pr edit ${{ github.event.pull_request.html_url }} --add-label ${{ steps.ci_approval_check.output.ci_approved_label }}
+          gh pr edit ${{ github.event.pull_request.html_url }} --add-label ${{ steps.approval_check.output.ci_approved_label }}
