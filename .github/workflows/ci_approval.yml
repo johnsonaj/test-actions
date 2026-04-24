@@ -28,7 +28,7 @@ jobs:
           maintainers: ${{ secrets.CI_APPROVED_USERS }}
 
       - name: Add CI Approved Label
-        if: steps.ci_approval_check.output.ci_approved_label != ''
+        if: steps.approval_check.output.ci_approved_label != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
