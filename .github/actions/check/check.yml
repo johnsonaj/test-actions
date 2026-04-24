@@ -12,17 +12,9 @@ inputs:
     required: false
 
 outputs:
-  core_contributor:
-    description: Whether the user is a Core Contributor
-    value: ${{ steps.core_contributor.outputs.check }}
-
-  maintainer:
-    description: Whether the user is a maintainer
+  ci_approved_label:
+    description: Label that indicates CI approval
     value: ${{ steps.maintainer.outputs.check }}
-
-  partner:
-    description: Whether the user is a partner
-    value: ${{ steps.partner.outputs.check }}
 
 runs:
   using: composite
