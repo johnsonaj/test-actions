@@ -23,7 +23,7 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'ci-approved-maintainer')
     runs-on: ubuntu-latest
     permissions:
-      issues: write
+      pull-requests: write
     steps:
       - name: Comment Test Started
         env:
