@@ -19,9 +19,17 @@ jobs:
       maintainers: ${{ secrets.CI_APPROVED_USERS }}
       token: ${{ secrets.GITHUB_TOKEN }}
 
-#  start_tc_test:
-#    if: contains(github.event.pull_request.labels.*.name, 'your-label-name')
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Start Test
-#        run: echo "Starting tests for PR with CI approval label"
+  start_tc_test:
+    if: contains(github.event.pull_request.labels.*.name, 'ci-approved-maintainer')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Comment Test Started
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "Test started."
+
