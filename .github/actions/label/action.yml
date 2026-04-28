@@ -1,0 +1,21 @@
+name: Label
+description: Check a username against our lists of groups
+
+inputs:
+  label:
+    description: The GitHub label to apply
+    required: true
+
+  github_url:
+    description: The GitHub URL
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Add Label
+      id: add_label
+      if: inputs.label != ''
+      shell: bash
+      run: |
+        gh pr edit ${{ inputs.github_url }} --add-label ${{ inputs.label }}
