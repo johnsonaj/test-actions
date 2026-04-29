@@ -19,8 +19,17 @@ jobs:
       maintainers: ${{ secrets.CI_APPROVED_USERS }}
       token: ${{ secrets.GITHUB_TOKEN }}
 
+  check_labels:
+    if: github.event.action == 'labeled'
+    uses: ./.github/workflows/reusable_label_check.yml
+    with:
+      labels: ${{ toJson(github.event.pull_request.labels.*.name) }}
+    secrets:
+      maintainers: ${{ secrets.CI_APPROVED_USERS }}
+
   start_tc_test:
-    if: contains(github.event.pull_request.labels.*.name, 'ci-approved-maintainer')
+    needs: check_labels
+    if: github.event.action == 'labeled' && needs.check_labels.outputs.has_label == 'true'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
