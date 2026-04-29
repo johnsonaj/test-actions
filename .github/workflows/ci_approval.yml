@@ -16,7 +16,7 @@ jobs:
     with:
       user_login: ${{ github.event.pull_request.user.login }}
     secrets:
-      : ${{ secrets.CI_APPROVED_USERS }}
+      approved_users: ${{ secrets.CI_APPROVED_USERS }}
       app_id: ${{ secrets.APP_ID }}
       app_key: ${{ secrets.APP_KEY }}
 
