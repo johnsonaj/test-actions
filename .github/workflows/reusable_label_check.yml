@@ -10,15 +10,20 @@ on:
     outputs:
       has_label:
         description: Whether label is present
-        value: ${{ steps.label_check.outputs.check }}
+        value: ${{ jobs.label_check.outputs.has_label }}
 
 jobs:
   label_check:
     runs-on: ubuntu-latest
+    outputs:
+      has_label: ${{ steps.label_check.outputs.check }}
     steps:
       - name: Check Labels
         id: label_check
         shell: bash
+        env:
+          LABELS_JSON: ${{ inputs.labels }}
+          MAINTAINERS_B64: ${{ secrets.maintainers }}
         run: |
-          $MAINTAINERS=$(echo ${{ secrets.maintainers }} | base64 --decode)
-          echo "check=$(jq -n --argjson a $MAINTAINERS --argjson b ${{ inputs.labels }} -r 'any($b[]; . as $x | $a | index($x) != null)')" >> "$GITHUB_OUTPUT"
+          MAINTAINERS_JSON="$(echo "$MAINTAINERS_B64" | base64 --decode)"
+          echo "check=$(jq -n --argjson maintainers "$MAINTAINERS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($maintainers | keys | index($label)) != null)')" >> "$GITHUB_OUTPUT"
