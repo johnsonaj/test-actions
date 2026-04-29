@@ -17,6 +17,8 @@ jobs:
       user_login: ${{ github.event.pull_request.user.login }}
     secrets:
       maintainers: ${{ secrets.CI_APPROVED_USERS }}
+      app_id: ${{ secrets.APP_ID }}
+      app_key: ${{ secrets.APP_KEY }}
 #      token: ${{ secrets.GITHUB_TOKEN }}
 
   check_labels:
