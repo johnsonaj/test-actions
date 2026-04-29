@@ -23,7 +23,7 @@ jobs:
     if: github.event.action == 'labeled'
     uses: ./.github/workflows/reusable_label_check.yml
     with:
-      labels: ${{ toJson(github.event.pull_request.labels.*.name) }}
+      labels: ${{ format('[{0}]', toJson(github.event.label.name)) }}
     secrets:
       maintainers: ${{ secrets.CI_APPROVED_USERS }}
 
@@ -41,4 +41,3 @@ jobs:
           gh pr comment "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}" \
             --body "Test started."
-
