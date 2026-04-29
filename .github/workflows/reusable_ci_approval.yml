@@ -34,9 +34,12 @@ jobs:
           approved_users: ${{ secrets.approved_users }}
 
       - name: Label PR if Approved
-        if: steps.approval_check.outputs.ci_approved_label != ''
         shell: bash
         env:
           GH_TOKEN: ${{ steps.app_token.outputs.token }}
         run: |
-          gh pr edit ${{ github.event.pull_request.html_url }} --add-label ${{ steps.approval_check.outputs.ci_approved_label }}
+          label="${{ steps.approval_check.outputs.ci_approved_label }}"
+          if [ -z "$label" ]; then
+            label="ci-needs-mainainer-review"
+          fi
+          gh pr edit ${{ github.event.pull_request.html_url }} --add-label "$label"
