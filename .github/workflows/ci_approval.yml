@@ -16,7 +16,7 @@ jobs:
     with:
       user_login: ${{ github.event.pull_request.user.login }}
     secrets:
-      maintainers: ${{ secrets.CI_APPROVED_USERS }}
+      approved_users: ${{ secrets.CI_APPROVED_USERS }}
       app_id: ${{ secrets.APP_ID }}
       app_key: ${{ secrets.APP_KEY }}
 
@@ -26,7 +26,7 @@ jobs:
     with:
       labels: ${{ format('[{0}]', toJson(github.event.label.name)) }}
     secrets:
-      maintainers: ${{ secrets.CI_APPROVED_USERS }}
+      approved_users: ${{ secrets.CI_APPROVED_USERS }}
 
   start_tc_test:
     needs: check_labels

@@ -5,7 +5,7 @@ on:
         required: true
         type: string
     secrets:
-      maintainers:
+      approved_users:
         required: true
     outputs:
       has_approved_label:
@@ -23,7 +23,7 @@ jobs:
         shell: bash
         env:
           LABELS_JSON: ${{ inputs.labels }}
-          MAINTAINERS_B64: ${{ secrets.maintainers }}
+          APPROVED_USERS_B64: ${{ secrets.approved_users }}
         run: |
-          MAINTAINERS_JSON="$(echo "$MAINTAINERS_B64" | base64 --decode)"
-          echo "check=$(jq -n --argjson maintainers "$MAINTAINERS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($maintainers | keys | index($label)) != null)')" >> "$GITHUB_OUTPUT"
+          APPROVED_USERS_JSON="$(echo "$APPROVED_USERS_B64" | base64 --decode)"
+          echo "check=$(jq -n --argjson approved_users "$APPROVED_USERS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($approved_users | keys | index($label)) != null)')" >> "$GITHUB_OUTPUT"
