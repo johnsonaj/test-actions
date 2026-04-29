@@ -7,20 +7,20 @@ inputs:
     required: true
 
   approved_users:
-    description: The base64 encoded list of maintainers
+    description: The base64 encoded list of approved users and their associated labels
     required: false
 
 outputs:
   ci_approved_label:
     description: Label that indicates CI approval
-    value: ${{ steps.maintainer.outputs.check }}
+    value: ${{ steps.approved-user.outputs.check }}
 
 runs:
   using: composite
   steps:
-    - name: Maintainer
-      id: maintainer
-      if: inputs.maintainers != ''
+    - name: Approved Users Check
+      id: approved-user
+      if: inputs.approved_users != ''
       shell: bash
       run: |
         echo "check=$(echo ${{ inputs.approved_users }} | base64 --decode | jq --arg u ${{ inputs.user_login }} -r 'to_entries[] | select(.value[] == $u) | .key')" >> "$GITHUB_OUTPUT"
