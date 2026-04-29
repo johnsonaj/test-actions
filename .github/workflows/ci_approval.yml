@@ -16,7 +16,7 @@ jobs:
     with:
       user_login: ${{ github.event.pull_request.user.login }}
     secrets:
-      approved_users: ${{ secrets.CI_APPROVED_USERS }}
+      : ${{ secrets.CI_APPROVED_USERS }}
       app_id: ${{ secrets.APP_ID }}
       app_key: ${{ secrets.APP_KEY }}
 
@@ -40,11 +40,22 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ needs.check_labels.outputs.has_approved_label }}" = "true" ]; then
-            body="Test Started"
-          else
-            body="Automated testing is pending maintainer approval"
-          fi
+            comment_id=$(gh api \
+              "/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+              --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("Automated testing is pending maintainer approval"))) | .id' \
+              | head -1)
 
-          gh pr comment "${{ github.event.pull_request.number }}" \
-            --repo "${{ github.repository }}" \
-            --body "$body"
+            if [ -n "$comment_id" ]; then
+              gh api --method PATCH \
+                "/repos/${{ github.repository }}/issues/comments/$comment_id" \
+                --field body="Test Started"
+            else
+              gh pr comment "${{ github.event.pull_request.number }}" \
+                --repo "${{ github.repository }}" \
+                --body "Test Started"
+            fi
+          else
+            gh pr comment "${{ github.event.pull_request.number }}" \
+              --repo "${{ github.repository }}" \
+              --body "Automated testing is pending maintainer approval"
+          fi
