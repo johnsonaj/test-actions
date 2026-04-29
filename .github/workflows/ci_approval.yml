@@ -19,7 +19,6 @@ jobs:
       maintainers: ${{ secrets.CI_APPROVED_USERS }}
       app_id: ${{ secrets.APP_ID }}
       app_key: ${{ secrets.APP_KEY }}
-#      token: ${{ secrets.GITHUB_TOKEN }}
 
   check_labels:
     if: github.event.action == 'labeled'
@@ -31,15 +30,21 @@ jobs:
 
   start_tc_test:
     needs: check_labels
-    if: github.event.action == 'labeled' && needs.check_labels.outputs.has_label == 'true'
+    if: github.event.action == 'labeled'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
-      - name: Comment Test Started
+      - name: Comment test status
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if [ "${{ needs.check_labels.outputs.has_approved_label }}" = "true" ]; then
+            body="Test Started"
+          else
+            body="Automated testing is pending maintainer approval"
+          fi
+
           gh pr comment "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}" \
-            --body "Test started."
+            --body "$body"

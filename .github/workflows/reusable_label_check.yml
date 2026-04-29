@@ -8,7 +8,7 @@ on:
       maintainers:
         required: true
     outputs:
-      has_label:
+      has_approved_label:
         description: Whether label is present
         value: ${{ jobs.label_check.outputs.has_label }}
 
