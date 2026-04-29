@@ -46,14 +46,16 @@ jobs:
               | head -1)
 
             if [ -n "$comment_id" ]; then
-              gh api --method PATCH \
-                "/repos/${{ github.repository }}/issues/comments/$comment_id" \
-                --field body="Test Started"
+              gh api --method DELETE \
+                "/repos/${{ github.repository }}/issues/comments/$comment_id"
+              new_body="Your PR has been reviewed by a maintainer and approved for automated testing"
             else
-              gh pr comment "${{ github.event.pull_request.number }}" \
-                --repo "${{ github.repository }}" \
-                --body "Test Started"
+              new_body="Test Started"
             fi
+
+            gh pr comment "${{ github.event.pull_request.number }}" \
+              --repo "${{ github.repository }}" \
+              --body "$new_body"
           else
             gh pr comment "${{ github.event.pull_request.number }}" \
               --repo "${{ github.repository }}" \
