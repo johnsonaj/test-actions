@@ -7,13 +7,16 @@ on:
     secrets:
       maintainers:
         required: true
-      token:
-        required: true
 
 jobs:
   ci_approval_check:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        id: app_token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_KEY }}
       - name: Checkout Approval Check
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -30,6 +33,6 @@ jobs:
         if: steps.approval_check.outputs.ci_approved_label != ''
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.token }}
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
         run: |
           gh pr edit ${{ github.event.pull_request.html_url }} --add-label ${{ steps.approval_check.outputs.ci_approved_label }}

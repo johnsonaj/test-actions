@@ -17,7 +17,7 @@ jobs:
       user_login: ${{ github.event.pull_request.user.login }}
     secrets:
       maintainers: ${{ secrets.CI_APPROVED_USERS }}
-      token: ${{ secrets.GITHUB_TOKEN }}
+#      token: ${{ secrets.GITHUB_TOKEN }}
 
   check_labels:
     if: github.event.action == 'labeled'
