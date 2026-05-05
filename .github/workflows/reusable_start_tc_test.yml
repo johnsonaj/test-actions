@@ -28,4 +28,4 @@ jobs:
           HAS_APPROVED_LABEL: ${{ inputs.has_approved_label }}
           PR_NUMBER: ${{ inputs.pr_number }}
           GITHUB_REPOSITORY: ${{ inputs.repository }}
-        run: johnsonaj/test-actions/.github/scripts/start_tc_test.sh
+        run: .github/scripts/start_tc_test.sh
