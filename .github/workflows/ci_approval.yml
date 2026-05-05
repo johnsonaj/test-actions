@@ -40,3 +40,5 @@ jobs:
       repository: ${{ github.repository }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
+      app_id: ${{ secrets.APP_ID }}
+      app_key: ${{ secrets.APP_KEY }}
