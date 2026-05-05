@@ -20,12 +20,15 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Checkout
+      - name: Checkout script repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: johnsonaj/test-actions
+          path: script-repo
       - name: Comment test status
         env:
           GH_TOKEN: ${{ secrets.token }}
           HAS_APPROVED_LABEL: ${{ inputs.has_approved_label }}
           PR_NUMBER: ${{ inputs.pr_number }}
           GITHUB_REPOSITORY: ${{ inputs.repository }}
-        run: .github/scripts/start_tc_test.sh
+        run: script-repo/.github/scripts/start_tc_test.sh
