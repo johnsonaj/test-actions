@@ -28,7 +28,7 @@ jobs:
 
       - name: Approval Check
         id: approval_check
-        uses: ./.github/actions/check
+        uses: johnsonaj/test-actions/.github/actions/check@main
         with:
           user_login: ${{ inputs.user_login }}
           approved_users: ${{ secrets.approved_users }}
