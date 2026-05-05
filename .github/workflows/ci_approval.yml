@@ -23,6 +23,8 @@ jobs:
   check_labels:
     if: github.event.action == 'labeled'
     uses: ./.github/workflows/reusable_label_check.yml
+    permissions:
+      pull-requests: write
     with:
       labels: ${{ format('[{0}]', toJson(github.event.label.name)) }}
       user_login: ${{ github.event.sender.login }}
