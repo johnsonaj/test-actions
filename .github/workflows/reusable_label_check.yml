@@ -4,13 +4,29 @@ on:
       labels:
         required: true
         type: string
+      user_login:
+        description: Username to check against the maintainers list
+        required: true
+        type: string
+      pr_number:
+        description: Pull request number
+        required: true
+        type: number
     secrets:
       approved_users:
+        required: true
+      token:
+        required: true
+      maintainers:
+        description: Base64 encoded JSON array of maintainers
         required: true
     outputs:
       has_approved_label:
         description: Whether label is present
         value: ${{ jobs.label_check.outputs.has_label }}
+      is_maintainer:
+        description: Whether the username is in the maintainers list
+        value: ${{ jobs.check_maintainers.outputs.is_maintainer }}
 
 jobs:
   label_check:
@@ -27,3 +43,37 @@ jobs:
         run: |
           APPROVED_USERS_JSON="$(echo "$APPROVED_USERS_B64" | base64 --decode)"
           echo "check=$(jq -n --argjson approved_users "$APPROVED_USERS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($approved_users | keys | index($label)) != null)')" >> "$GITHUB_OUTPUT"
+
+  check_maintainers:
+    needs: label_check
+    runs-on: ubuntu-latest
+    outputs:
+      is_maintainer: ${{ steps.check_maintainers.outputs.is_maintainer }}
+    steps:
+      - name: Check Maintainers
+        id: check_maintainers
+        shell: bash
+        env:
+          MAINTAINERS_B64: ${{ secrets.maintainers }}
+          USERNAME: ${{ inputs.user_login }}
+        run: |
+          MAINTAINERS_JSON="$(echo "$MAINTAINERS_B64" | base64 --decode)"
+          echo "is_maintainer=$(echo "$MAINTAINERS_JSON" | jq --arg user "$USERNAME" 'any(.[]; . == $user)')" >> "$GITHUB_OUTPUT"
+
+  remove_label:
+    needs: check_maintainers
+    if: needs.check_maintainers.outputs.is_maintainer == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove label
+        env:
+          GH_TOKEN: ${{ secrets.token }}
+          LABELS_JSON: ${{ inputs.labels }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          label=$(echo "$LABELS_JSON" | jq -r '.[0]')
+          gh pr edit "$PR_NUMBER" \
+            --repo "${{ github.repository }}" \
+            --remove-label "$label"

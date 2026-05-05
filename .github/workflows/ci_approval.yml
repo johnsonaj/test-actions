@@ -25,8 +25,12 @@ jobs:
     uses: ./.github/workflows/reusable_label_check.yml
     with:
       labels: ${{ format('[{0}]', toJson(github.event.label.name)) }}
+      user_login: ${{ github.event.sender.login }}
+      pr_number: ${{ github.event.pull_request.number }}
     secrets:
       approved_users: ${{ secrets.CI_APPROVED_USERS }}
+      maintainers: ${{ secrets.MAINTAINERS }}
+      token: ${{ secrets.GITHUB_TOKEN }}
 
   start_tc_test:
     needs: check_labels
