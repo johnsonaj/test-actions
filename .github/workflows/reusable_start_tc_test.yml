@@ -22,12 +22,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          sparse-checkout: johnsonaj/test-actions/.github/scripts/start_tc_test.sh@main
       - name: Comment test status
         env:
           GH_TOKEN: ${{ secrets.token }}
           HAS_APPROVED_LABEL: ${{ inputs.has_approved_label }}
           PR_NUMBER: ${{ inputs.pr_number }}
           GITHUB_REPOSITORY: ${{ inputs.repository }}
-        run: johnsonaj/test-actions/.github/scripts/start_tc_test.sh
+        run: .github/scripts/start_tc_test.sh
