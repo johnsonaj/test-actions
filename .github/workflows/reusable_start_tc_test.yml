@@ -19,7 +19,7 @@ on:
         required: true
 
 jobs:
-  start_tc_test:
+  comment_status:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
