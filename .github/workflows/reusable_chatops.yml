@@ -45,16 +45,25 @@ jobs:
             echo "has_command=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Get app token for checkout
+        if: steps.check_prefix.outputs.has_command == 'true'
+        id: checkout_token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          app-id: ${{ secrets.app_id }}
+          private-key: ${{ secrets.app_key }}
       - name: Checkout Check Maintainer
         if: steps.check_prefix.outputs.has_command == 'true'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          sparse-checkout: johnsonaj/test-actions/.github/actions/check_maintainer@main
+          repository: johnsonaj/test-actions
+          token: ${{ steps.checkout_token.outputs.token }}
+          path: script-repo
 
       - name: Check Maintainer
         if: steps.check_prefix.outputs.has_command == 'true'
         id: check_maintainer
-        uses: johnsonaj/test-actions/.github/actions/check_maintainer@main
+        uses: script-repo/.github/actions/check_maintainer
         with:
           username: ${{ inputs.username }}
           maintainers: ${{ secrets.maintainers }}
