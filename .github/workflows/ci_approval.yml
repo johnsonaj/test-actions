@@ -45,8 +45,10 @@ jobs:
       chat_command: '/test'
       comment: ${{ github.event.comment.body }}
       username: ${{ github.event.comment.user.login }}
+      issue_number: ${{ github.event.issue.number }}
     secrets:
       maintainers: ${{ secrets.MAINTAINERS }}
+      token: ${{ secrets.GITHUB_TOKEN }}
 
   start_tc_test:
     needs: check_labels
