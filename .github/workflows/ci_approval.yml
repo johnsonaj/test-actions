@@ -42,7 +42,7 @@ jobs:
     if: github.event_name == 'issue_comment'
     uses: ./.github/workflows/reusable_chatops.yml
     with:
-      chat_command: '@autobot'
+      chat_command: '/test'
       comment: ${{ github.event.comment.body }}
       username: ${{ github.event.comment.user.login }}
     secrets:
