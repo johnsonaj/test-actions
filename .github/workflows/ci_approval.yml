@@ -24,14 +24,18 @@ jobs:
       app_key: ${{ secrets.APP_KEY }}
 
   check_labels:
-    if: github.event.action == 'labeled'
+    needs: chatops
+    if: |
+      always() &&
+      (github.event.action == 'labeled' ||
+       needs.chatops.result == 'success')
     uses: ./.github/workflows/reusable_label_check.yml
     permissions:
       pull-requests: write
     with:
-      labels: ${{ format('[{0}]', toJson(github.event.label.name)) }}
-      user_login: ${{ github.event.sender.login }}
-      pr_number: ${{ github.event.pull_request.number }}
+      labels: ${{ github.event.action == 'labeled' && format('[{0}]', toJson(github.event.label.name)) || '["ci-approved-maintainer"]' }}
+      user_login: ${{ github.event.sender.login || github.event.comment.user.login }}
+      pr_number: ${{ github.event.pull_request.number || github.event.issue.number }}
       label_bot: johnsonaj-bot[bot]
     secrets:
       approved_users: ${{ secrets.CI_APPROVED_USERS }}
@@ -51,6 +55,8 @@ jobs:
     secrets:
       maintainers: ${{ secrets.MAINTAINERS }}
       token: ${{ secrets.GITHUB_TOKEN }}
+      app_id: ${{ secrets.APP_ID }}
+      app_key: ${{ secrets.APP_KEY }}
 
   start_tc_test:
     needs: check_labels
