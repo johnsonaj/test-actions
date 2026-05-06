@@ -23,7 +23,7 @@ on:
     outputs:
       has_approved_label:
         description: Whether label is present
-        value: ${{ jobs.remove_label.result == 'success' && 'false' || jobs.label_check.outputs.has_label }}
+        value: ${{ jobs.set_label.result == 'success' && 'false' || jobs.label_check.outputs.has_label }}
       is_maintainer:
         description: Whether the username is in the maintainers list
         value: ${{ jobs.check_maintainers.outputs.is_maintainer }}
