@@ -5,6 +5,9 @@ on:
     types:
       - opened
       - labeled
+  issue_comment:
+    types:
+      - created
 
 jobs:
   ci_approval:
@@ -34,6 +37,16 @@ jobs:
       approved_users: ${{ secrets.CI_APPROVED_USERS }}
       maintainers: ${{ secrets.MAINTAINERS }}
       token: ${{ secrets.GITHUB_TOKEN }}
+
+  chatops:
+    if: github.event_name == 'issue_comment'
+    uses: ./.github/workflows/reusable_chatops.yml
+    with:
+      chat_command: '@autobot'
+      comment: ${{ github.event.comment.body }}
+      username: ${{ github.event.comment.user.login }}
+    secrets:
+      maintainers: ${{ secrets.MAINTAINERS }}
 
   start_tc_test:
     needs: check_labels

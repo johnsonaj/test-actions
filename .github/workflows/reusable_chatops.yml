@@ -1,0 +1,57 @@
+on:
+  workflow_call:
+    inputs:
+      chat_command:
+        description: The command prefix to look for in the comment
+        required: true
+        type: string
+      comment:
+        description: The comment body to check
+        required: true
+        type: string
+      username:
+        description: The username who made the comment
+        required: true
+        type: string
+    secrets:
+      maintainers:
+        description: Base64 encoded JSON array of maintainers
+        required: true
+
+jobs:
+  chatops:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check command prefix
+        id: check_prefix
+        shell: bash
+        run: |
+          comment="${{ inputs.comment }}"
+          command="${{ inputs.chat_command }}"
+          if [[ "$comment" == "$command"* ]]; then
+            echo "has_command=true" >> "$GITHUB_OUTPUT"
+            echo "remainder=${comment#"$command"}" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_command=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout Check Maintainer
+        if: steps.check_prefix.outputs.has_command == 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          sparse-checkout: johnsonaj/test-actions/.github/actions/check_maintainer@main
+
+      - name: Check Maintainer
+        if: steps.check_prefix.outputs.has_command == 'true'
+        id: check_maintainer
+        uses: johnsonaj/test-actions/.github/actions/check_maintainer@main
+        with:
+          username: ${{ inputs.username }}
+          maintainers: ${{ secrets.maintainers }}
+
+      - name: Execute command
+        if: steps.check_prefix.outputs.has_command == 'true' && steps.check_maintainer.outputs.is_maintainer == 'true'
+        shell: bash
+        run: |
+          echo "command executed"
+          echo "${{ steps.check_prefix.outputs.remainder }}"
