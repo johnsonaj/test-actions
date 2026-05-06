@@ -63,7 +63,7 @@ jobs:
       - name: Check Maintainer
         if: steps.check_prefix.outputs.has_command == 'true'
         id: check_maintainer
-        uses: script-repo/.github/actions/check_maintainer
+        uses: script-repo/.github/actions/check_maintainer@main
         with:
           username: ${{ inputs.username }}
           maintainers: ${{ secrets.maintainers }}
