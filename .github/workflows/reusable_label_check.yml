@@ -60,7 +60,7 @@ jobs:
           MAINTAINERS_JSON="$(echo "$MAINTAINERS_B64" | base64 --decode)"
           echo "is_maintainer=$(echo "$MAINTAINERS_JSON" | jq --arg user "$USERNAME" 'any(.[]; . == $user)')" >> "$GITHUB_OUTPUT"
 
-  remove_label:
+  set_label:
     needs: [label_check, check_maintainers]
     if: needs.check_maintainers.outputs.is_maintainer == 'false' && needs.label_check.outputs.has_label == 'true'
     runs-on: ubuntu-latest
@@ -77,3 +77,17 @@ jobs:
           gh pr edit "$PR_NUMBER" \
             --repo "${{ github.repository }}" \
             --remove-label "$label"
+      - name: Add ci-needs-maintainer-review label
+        env:
+          GH_TOKEN: ${{ secrets.token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          existing=$(gh pr view "$PR_NUMBER" \
+            --repo "${{ github.repository }}" \
+            --json labels \
+            --jq '[.labels[].name] | any(. == "ci-needs-maintainer-review")')
+          if [ "$existing" != "true" ]; then
+            gh pr edit "$PR_NUMBER" \
+              --repo "${{ github.repository }}" \
+              --add-label "ci-needs-maintainer-review"
+          fi
