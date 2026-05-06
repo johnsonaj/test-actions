@@ -41,6 +41,8 @@ jobs:
   chatops:
     if: github.event_name == 'issue_comment'
     uses: ./.github/workflows/reusable_chatops.yml
+    permissions:
+      pull-requests: write
     with:
       chat_command: '/test'
       comment: ${{ github.event.comment.body }}
