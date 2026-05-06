@@ -46,6 +46,7 @@ jobs:
 
   check_maintainers:
     needs: label_check
+    if: needs.label_check.outputs.has_label == 'true'
     runs-on: ubuntu-latest
     outputs:
       is_maintainer: ${{ steps.check_maintainers.outputs.is_maintainer }}
