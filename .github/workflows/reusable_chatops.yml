@@ -58,12 +58,12 @@ jobs:
         with:
           repository: johnsonaj/test-actions
           token: ${{ steps.checkout_token.outputs.token }}
-          path: script-repo
+          sparse-checkout: .github/actions/check_maintainer
 
       - name: Check Maintainer
         if: steps.check_prefix.outputs.has_command == 'true'
         id: check_maintainer
-        uses: script-repo/.github/actions/check_maintainer@main
+        uses: johnsonaj/test-actions/.github/actions/check_maintainer@main
         with:
           username: ${{ inputs.username }}
           maintainers: ${{ secrets.maintainers }}
