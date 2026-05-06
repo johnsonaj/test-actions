@@ -29,6 +29,7 @@ jobs:
       labels: ${{ format('[{0}]', toJson(github.event.label.name)) }}
       user_login: ${{ github.event.sender.login }}
       pr_number: ${{ github.event.pull_request.number }}
+      label_bot: johnsonaj-bot[bot]
     secrets:
       approved_users: ${{ secrets.CI_APPROVED_USERS }}
       maintainers: ${{ secrets.MAINTAINERS }}

@@ -12,6 +12,10 @@ on:
         description: Pull request number
         required: true
         type: number
+      label_bot:
+        description: If set, this login is treated as a maintainer
+        required: false
+        type: string
     secrets:
       approved_users:
         required: true
@@ -49,7 +53,7 @@ jobs:
     if: needs.label_check.outputs.has_label == 'true'
     runs-on: ubuntu-latest
     outputs:
-      is_maintainer: ${{ steps.check_maintainers.outputs.is_maintainer }}
+      is_maintainer: ${{ steps.resolve.outputs.is_maintainer }}
     steps:
       - name: Checkout Check Maintainer
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -61,6 +65,15 @@ jobs:
         with:
           username: ${{ inputs.user_login }}
           maintainers: ${{ secrets.maintainers }}
+      - name: Resolve is_maintainer
+        id: resolve
+        shell: bash
+        run: |
+          if [ "${{ inputs.label_bot }}" != "" ] && [ "${{ inputs.user_login }}" = "${{ inputs.label_bot }}" ]; then
+            echo "is_maintainer=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_maintainer=${{ steps.check_maintainers.outputs.is_maintainer }}" >> "$GITHUB_OUTPUT"
+          fi
 
   set_label:
     needs: [label_check, check_maintainers]
