@@ -41,6 +41,8 @@ jobs:
       approved_users: ${{ secrets.CI_APPROVED_USERS }}
       maintainers: ${{ secrets.MAINTAINERS }}
       token: ${{ secrets.GITHUB_TOKEN }}
+      app_id: ${{ secrets.APP_ID }}
+      app_key: ${{ secrets.APP_KEY }}
 
   chatops:
     if: github.event_name == 'issue_comment'

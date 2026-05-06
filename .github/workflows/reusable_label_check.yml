@@ -24,6 +24,10 @@ on:
       maintainers:
         description: Base64 encoded JSON array of maintainers
         required: true
+      app_id:
+        required: true
+      app_key:
+        required: true
     outputs:
       has_approved_label:
         description: Whether label is present
@@ -55,9 +59,16 @@ jobs:
     outputs:
       is_maintainer: ${{ steps.resolve.outputs.is_maintainer }}
     steps:
+      - name: Get app token
+        id: app_token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          app-id: ${{ secrets.app_id }}
+          private-key: ${{ secrets.app_key }}
       - name: Checkout Check Maintainer
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          token: ${{ steps.app_token.outputs.token }}
           sparse-checkout: johnsonaj/test-actions/.github/actions/check_maintainer@main
       - name: Check Maintainers
         id: check_maintainers
