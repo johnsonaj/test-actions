@@ -51,15 +51,16 @@ jobs:
     outputs:
       is_maintainer: ${{ steps.check_maintainers.outputs.is_maintainer }}
     steps:
+      - name: Checkout Check Maintainer
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          sparse-checkout: johnsonaj/test-actions/.github/actions/check_maintainer@main
       - name: Check Maintainers
         id: check_maintainers
-        shell: bash
-        env:
-          MAINTAINERS_B64: ${{ secrets.maintainers }}
-          USERNAME: ${{ inputs.user_login }}
-        run: |
-          MAINTAINERS_JSON="$(echo "$MAINTAINERS_B64" | base64 --decode)"
-          echo "is_maintainer=$(echo "$MAINTAINERS_JSON" | jq --arg user "$USERNAME" 'any(.[]; . == $user)')" >> "$GITHUB_OUTPUT"
+        uses: johnsonaj/test-actions/.github/actions/check_maintainer@main
+        with:
+          username: ${{ inputs.user_login }}
+          maintainers: ${{ secrets.maintainers }}
 
   set_label:
     needs: [label_check, check_maintainers]

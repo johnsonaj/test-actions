@@ -1,0 +1,28 @@
+name: Check Maintainer
+description: Checks if a username is in a base64 encoded JSON array of maintainers
+
+inputs:
+  username:
+    description: Username to check against the maintainers list
+    required: true
+  maintainers:
+    description: Base64 encoded JSON array of maintainers
+    required: true
+
+outputs:
+  is_maintainer:
+    description: Whether the username is in the maintainers list
+    value: ${{ steps.check_maintainers.outputs.is_maintainer }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check Maintainers
+      id: check_maintainers
+      shell: bash
+      env:
+        MAINTAINERS_B64: ${{ inputs.maintainers }}
+        USERNAME: ${{ inputs.username }}
+      run: |
+        MAINTAINERS_JSON="$(echo "$MAINTAINERS_B64" | base64 --decode)"
+        echo "is_maintainer=$(echo "$MAINTAINERS_JSON" | jq --arg user "$USERNAME" 'any(.[]; . == $user)')" >> "$GITHUB_OUTPUT"
