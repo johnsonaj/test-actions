@@ -60,13 +60,16 @@ jobs:
 
   start_tc_test:
     needs: check_labels
-    if: github.event.action == 'labeled' && needs.check_labels.outputs.has_approved_label == 'true'
+    if: |
+      always() &&
+      needs.check_labels.result == 'success' &&
+      needs.check_labels.outputs.has_approved_label == 'true'
     uses: ./.github/workflows/reusable_start_tc_test.yml
     permissions:
       pull-requests: write
     with:
       has_approved_label: ${{ needs.check_labels.outputs.has_approved_label }}
-      pr_number: ${{ github.event.pull_request.number }}
+      pr_number: ${{ github.event.pull_request.number || github.event.issue.number }}
       repository: ${{ github.repository }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
