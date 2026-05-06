@@ -13,9 +13,15 @@ on:
         description: The username who made the comment
         required: true
         type: string
+      issue_number:
+        description: The issue or PR number to comment on
+        required: true
+        type: number
     secrets:
       maintainers:
         description: Base64 encoded JSON array of maintainers
+        required: true
+      token:
         required: true
 
 jobs:
@@ -51,7 +57,10 @@ jobs:
 
       - name: Execute command
         if: steps.check_prefix.outputs.has_command == 'true' && steps.check_maintainer.outputs.is_maintainer == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.token }}
         shell: bash
         run: |
-          echo "command executed"
-          echo "${{ steps.check_prefix.outputs.remainder }}"
+          gh pr comment "${{ inputs.issue_number }}" \
+            --repo "${{ github.repository }}" \
+            --body "command executed: ${{ steps.check_prefix.outputs.remainder }}"
