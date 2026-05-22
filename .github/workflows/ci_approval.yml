@@ -60,6 +60,8 @@ jobs:
       app_id: ${{ secrets.APP_ID }}
       app_key: ${{ secrets.APP_KEY }}
 
+  # starts tctest workflow.
+
   start_tc_test:
     needs: check_labels
     if: |
