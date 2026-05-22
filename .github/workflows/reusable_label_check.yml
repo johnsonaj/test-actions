@@ -72,7 +72,7 @@ jobs:
           sparse-checkout: johnsonaj/test-actions/.github/actions/check_maintainer@main
       - name: Check Maintainers
         id: check_maintainers
-        uses: johnsonaj/test-actions/.github/actions/check_maintainer@main
+        uses: ./.github/actions/check_maintainer
         with:
           username: ${{ inputs.user_login }}
           maintainers: ${{ secrets.maintainers }}
