@@ -51,7 +51,7 @@ jobs:
           APPROVED_USERS_B64: ${{ secrets.approved_users }}
         run: |
           APPROVED_USERS_JSON="$(echo "$APPROVED_USERS_B64" | base64 --decode)"
-          echo "check=$(jq -n --argjson approved_users "$APPROVED_USERS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($approved_users | keys | index($label)) != null)')" >> "$GITHUB_OUTPUT"
+          echo "check=$(jq -n --argjson approved_users "$APPROVED_USERS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($approved_users | index($label)) != null)')" >> "$GITHUB_OUTPUT"
 
   check_maintainers:
     needs: label_check
