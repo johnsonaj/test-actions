@@ -37,19 +37,25 @@ runs:
       id: approved-user
       if: inputs.approved_users != ''
       shell: bash
+      env:
+        USER_LOGIN: ${{ inputs.user_login }}
+        APPROVED_USERS_B64: ${{ inputs.approved_users }}
+        MAINTAINERS: ${{ inputs.maintainers }}
+        APPROVED_LABEL_MAINTAINER: ${{ inputs.approved_label_maintainer }}
+        APPROVED_LABEL_OTHER: ${{ inputs.approved_label_other }}
       run: |
-        users=$(echo "${{ inputs.approved_users }}" | base64 --decode)
-        is_approved=$(echo "$users" | jq -r --arg u "${{ inputs.user_login }}" 'any(.[]; . == $u)')
+        users=$(echo "$APPROVED_USERS_B64" | base64 --decode)
+        is_approved=$(echo "$users" | jq -r --arg u "$USER_LOGIN" 'any(.[]; . == $u)')
         echo "is_approved_user=${is_approved}" >> "$GITHUB_OUTPUT"
-        if [ -n "${{ inputs.maintainers }}" ]; then
-          is_maintainer=$(echo "${{ inputs.maintainers }}" | jq -r --arg u "${{ inputs.user_login }}" 'any(.[]; . == $u)')
+        if [ -n "$MAINTAINERS" ]; then
+          is_maintainer=$(echo "$MAINTAINERS" | jq -r --arg u "$USER_LOGIN" 'any(.[]; . == $u)')
         else
           is_maintainer="false"
         fi
         if [ "$is_maintainer" = "true" ]; then
-          echo "check=${{ inputs.approved_label_maintainer }}" >> "$GITHUB_OUTPUT"
+          echo "check=${APPROVED_LABEL_MAINTAINER}" >> "$GITHUB_OUTPUT"
         elif [ "$is_approved" = "true" ]; then
-          echo "check=${{ inputs.approved_label_other }}" >> "$GITHUB_OUTPUT"
+          echo "check=${APPROVED_LABEL_OTHER}" >> "$GITHUB_OUTPUT"
         else
           echo "check=" >> "$GITHUB_OUTPUT"
         fi
