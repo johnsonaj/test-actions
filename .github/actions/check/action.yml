@@ -7,13 +7,28 @@ inputs:
     required: true
 
   approved_users:
-    description: The base64 encoded list of approved users and their associated labels
+    description: Base64 encoded JSON array of approved usernames
+    required: false
+
+  maintainers:
+    description: JSON array of maintainer usernames
+    required: false
+
+  approved_label_maintainer:
+    description: Label to apply when the user is an approved maintainer
+    required: false
+
+  approved_label_other:
+    description: Label to apply when the user is approved but not a maintainer
     required: false
 
 outputs:
   ci_approved_label:
     description: Label that indicates CI approval
     value: ${{ steps.approved-user.outputs.check }}
+  is_approved_user:
+    description: Whether the user exists in the approved_users list
+    value: ${{ steps.approved-user.outputs.is_approved_user }}
 
 runs:
   using: composite
@@ -23,5 +38,19 @@ runs:
       if: inputs.approved_users != ''
       shell: bash
       run: |
-        echo "check=$(echo ${{ inputs.approved_users }} | base64 --decode | jq --arg u ${{ inputs.user_login }} -r 'to_entries[] | select(.value[] == $u) | .key')" >> "$GITHUB_OUTPUT"
+        users=$(echo "${{ inputs.approved_users }}" | base64 --decode)
+        is_approved=$(echo "$users" | jq -r --arg u "${{ inputs.user_login }}" 'any(.[]; . == $u)')
+        echo "is_approved_user=${is_approved}" >> "$GITHUB_OUTPUT"
+        if [ -n "${{ inputs.maintainers }}" ]; then
+          is_maintainer=$(echo "${{ inputs.maintainers }}" | jq -r --arg u "${{ inputs.user_login }}" 'any(.[]; . == $u)')
+        else
+          is_maintainer="false"
+        fi
+        if [ "$is_maintainer" = "true" ]; then
+          echo "check=${{ inputs.approved_label_maintainer }}" >> "$GITHUB_OUTPUT"
+        elif [ "$is_approved" = "true" ]; then
+          echo "check=${{ inputs.approved_label_other }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "check=" >> "$GITHUB_OUTPUT"
+        fi
 
