@@ -63,7 +63,7 @@ jobs:
           members=$(gh api \
             --paginate \
             "/orgs/${{ github.repository_owner }}/teams/${{ inputs.team_name }}/members" \
-            --jq '[.[].login]' | jq -s 'add // []')
+            --jq '[.[].login]' | jq -cs 'add // []')
           is_member=$(echo "$members" | jq -r --arg user "${{ inputs.username }}" 'any(.[]; . == $user)')
           echo "is_maintainer=${is_member}" >> "$GITHUB_OUTPUT"
 

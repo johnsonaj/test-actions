@@ -43,7 +43,7 @@ jobs:
           members=$(gh api \
             --paginate \
             "/orgs/${{ github.repository_owner }}/teams/${{ inputs.team_name }}/members" \
-            --jq '[.[].login]' | jq -s 'add // []')
+            --jq '[.[].login]' | jq -cs 'add // []')
           echo "members=${members}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout Approval Check
