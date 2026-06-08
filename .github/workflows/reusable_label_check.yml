@@ -2,6 +2,11 @@ on:
   workflow_call:
     inputs:
       labels:
+        description: JSON array of labels currently on the PR
+        required: true
+        type: string
+      approved_labels:
+        description: JSON array of labels that count as approved
         required: true
         type: string
       user_login:
@@ -21,8 +26,6 @@ on:
         required: true
         type: string
     secrets:
-      approved_users:
-        required: true
       token:
         required: true
       app_id:
@@ -48,10 +51,9 @@ jobs:
         shell: bash
         env:
           LABELS_JSON: ${{ inputs.labels }}
-          APPROVED_USERS_B64: ${{ secrets.approved_users }}
+          APPROVED_LABELS_JSON: ${{ inputs.approved_labels }}
         run: |
-          APPROVED_USERS_JSON="$(echo "$APPROVED_USERS_B64" | base64 --decode)"
-          echo "check=$(jq -n --argjson approved_users "$APPROVED_USERS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($approved_users | index($label)) != null)')" >> "$GITHUB_OUTPUT"
+          echo "check=$(jq -n --argjson approved_labels "$APPROVED_LABELS_JSON" --argjson labels "$LABELS_JSON" -r 'any($labels[]; . as $label | ($approved_labels | index($label)) != null)')" >> "$GITHUB_OUTPUT"
 
   check_maintainers:
     needs: label_check

@@ -35,12 +35,12 @@ jobs:
       pull-requests: write
     with:
       labels: ${{ github.event.action == 'labeled' && format('[{0}]', toJson(github.event.label.name)) || '["ci-approved-maintainer"]' }}
+      approved_labels: '["ci-approved-maintainer", "ci-approved-other"]'
       user_login: ${{ github.event.sender.login }}
       pr_number: ${{ github.event.pull_request.number || github.event.issue.number }}
       label_bot: johnsonaj-bot[bot]
       team_name: test-maintainer-team
     secrets:
-      approved_users: ${{ secrets.CI_APPROVED_USERS }}
       token: ${{ secrets.GITHUB_TOKEN }}
       app_id: ${{ secrets.APP_ID }}
       app_key: ${{ secrets.APP_KEY }}
