@@ -16,13 +16,14 @@ on:
         description: If set, this login is treated as a maintainer
         required: false
         type: string
+      team_name:
+        description: GitHub team slug to pull maintainers from
+        required: true
+        type: string
     secrets:
       approved_users:
         required: true
       token:
-        required: true
-      maintainers:
-        description: Base64 encoded JSON array of maintainers
         required: true
       app_id:
         required: true
@@ -66,19 +67,17 @@ jobs:
           app-id: ${{ secrets.app_id }}
           private-key: ${{ secrets.app_key }}
 
-      - name: Checkout Check Maintainer
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          repository: johnsonaj/test-actions
-          token: ${{ steps.app_token.outputs.token }}
-          sparse-checkout: ./.github/actions/check_maintainer
-
-      - name: Check Maintainers
+      - name: Check if user is a team member
         id: check_maintainers
-        uses: ./.github/actions/check_maintainer
-        with:
-          username: ${{ inputs.user_login }}
-          maintainers: ${{ secrets.maintainers }}
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+        run: |
+          members=$(gh api \
+            --paginate \
+            "/orgs/${{ github.repository_owner }}/teams/${{ inputs.team_name }}/members" \
+            --jq '[.[].login]' | jq -s 'add // []')
+          is_member=$(echo "$members" | jq -r --arg user "${{ inputs.user_login }}" 'any(.[]; . == $user)')
+          echo "is_maintainer=${is_member}" >> "$GITHUB_OUTPUT"
       - name: Resolve is_maintainer
         id: resolve
         shell: bash
