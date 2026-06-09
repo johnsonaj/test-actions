@@ -33,21 +33,37 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
-        id: app_token
+      - name: Find existing pending approval comment
+        id: find_comment
+        uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3
         with:
-          app-id: ${{ secrets.app_id }}
-          private-key: ${{ secrets.app_key }}
-      - name: Checkout script repo
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+          token: ${{ secrets.token }}
+          repository: ${{ inputs.repository }}
+          issue-number: ${{ inputs.pr_number }}
+          comment-author: github-actions[bot]
+          body-includes: "Automated testing is pending maintainer approval"
+      - name: Update existing comment when approved
+        if: inputs.has_approved_label == 'true' && steps.find_comment.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
         with:
-          repository: johnsonaj/test-actions
-          token: ${{ steps.app_token.outputs.token }}
-          path: script-repo
-      - name: Comment test status
-        env:
-          GH_TOKEN: ${{ secrets.token }}
-          HAS_APPROVED_LABEL: ${{ inputs.has_approved_label }}
-          PR_NUMBER: ${{ inputs.pr_number }}
-          GITHUB_REPOSITORY: ${{ inputs.repository }}
-        run: script-repo/.github/scripts/start_tc_test.sh
+          token: ${{ secrets.token }}
+          repository: ${{ inputs.repository }}
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          body: "Your PR has been reviewed by a maintainer and approved for automated testing"
+          edit-mode: replace
+      - name: Create new comment when approved
+        if: inputs.has_approved_label == 'true' && steps.find_comment.outputs.comment-id == ''
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
+        with:
+          token: ${{ secrets.token }}
+          repository: ${{ inputs.repository }}
+          issue-number: ${{ inputs.pr_number }}
+          body: "Test Started"
+      - name: Comment pending approval
+        if: inputs.has_approved_label != 'true'
+        uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
+        with:
+          token: ${{ secrets.token }}
+          repository: ${{ inputs.repository }}
+          issue-number: ${{ inputs.pr_number }}
+          body: "Automated testing is pending maintainer approval"
