@@ -25,30 +25,10 @@ on:
         required: true
 
 jobs:
-  remove_existing_labels:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get app token
-        id: app_token
-        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
-        with:
-          app-id: ${{ secrets.app_id }}
-          private-key: ${{ secrets.app_key }}
-
-      - name: Remove existing approval labels
-        env:
-          GH_TOKEN: ${{ steps.app_token.outputs.token }}
-        run: |
-          PR_URL="${{ github.event.pull_request.html_url }}"
-          for label in "${{ inputs.approved_label_maintainer }}" "${{ inputs.approved_label_other }}"; do
-            if [ -n "$label" ]; then
-              gh pr edit "$PR_URL" --remove-label "$label" 2>/dev/null || true
-            fi
-          done
-
   ci_approval_check:
     runs-on: ubuntu-latest
-    needs: remove_existing_labels
+    outputs:
+      ci_approved_label: ${{ steps.approval_check.outputs.ci_approved_label }}
     steps:
       - name: Get app token
         id: app_token
@@ -85,13 +65,39 @@ jobs:
           approved_label_maintainer: ${{ inputs.approved_label_maintainer }}
           approved_label_other: ${{ inputs.approved_label_other }}
 
-      - name: Label PR if Approved
+  label_pr:
+    runs-on: ubuntu-latest
+    needs: ci_approval_check
+    steps:
+      - name: Get app token
+        id: app_token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          app-id: ${{ secrets.app_id }}
+          private-key: ${{ secrets.app_key }}
+
+      - name: Label PR
         shell: bash
         env:
           GH_TOKEN: ${{ steps.app_token.outputs.token }}
         run: |
-          label="${{ steps.approval_check.outputs.ci_approved_label }}"
-          if [ -z "$label" ]; then
-            label="ci-needs-maintainer-review"
+          new_label="${{ needs.ci_approval_check.outputs.ci_approved_label }}"
+          if [ -z "$new_label" ]; then
+            new_label="ci-needs-maintainer-review"
           fi
-          gh pr edit ${{ github.event.pull_request.html_url }} --add-label "$label"
+
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          current_labels=$(gh pr view "$PR_URL" --json labels --jq '[.labels[].name]')
+
+          for label in "${{ inputs.approved_label_maintainer }}" "${{ inputs.approved_label_other }}"; do
+            if [ -n "$label" ] && [ "$label" != "$new_label" ]; then
+              if echo "$current_labels" | jq -e --arg l "$label" 'contains([$l])' > /dev/null; then
+                gh pr edit "$PR_URL" --remove-label "$label"
+              fi
+            fi
+          done
+
+          if echo "$current_labels" | jq -e --arg l "$new_label" 'contains([$l])' > /dev/null; then
+            gh pr edit "$PR_URL" --remove-label "$new_label"
+          fi
+          gh pr edit "$PR_URL" --add-label "$new_label"
