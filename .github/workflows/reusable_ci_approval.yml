@@ -6,7 +6,7 @@ on:
         type: string
       approved_label_maintainer:
         description: Label to apply when the user is an approved maintainer
-        required: false
+        required: true
         type: string
       approved_label_other:
         description: Label to apply when the user is approved but not a maintainer
